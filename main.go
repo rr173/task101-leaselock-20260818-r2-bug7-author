@@ -714,8 +714,16 @@ func handleAudit(svc *lease.Service) http.HandlerFunc {
 			return
 		}
 		resource := r.URL.Query().Get("resource")
-		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
-		offset, _ := strconv.Atoi(r.URL.Query().Get("offset"))
+		limit, err := parseQueryInt(r.URL.Query().Get("limit"))
+		if err != nil {
+			writeErr(w, http.StatusBadRequest, "invalid limit")
+			return
+		}
+		offset, err := parseQueryInt(r.URL.Query().Get("offset"))
+		if err != nil {
+			writeErr(w, http.StatusBadRequest, "invalid offset")
+			return
+		}
 		entries, err := svc.ListAudit(resource, limit, offset)
 		if err != nil {
 			writeErr(w, http.StatusBadRequest, err.Error())
